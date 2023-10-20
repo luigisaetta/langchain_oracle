@@ -15,7 +15,7 @@ class OCIGenAILLM(LLM):
     # added by LS
     model_id: str = "cohere.command"
     debug: bool = False
-    
+
     max_tokens: int = 300
     temperature: int = 0
     frequency_penalty: int = 1
@@ -24,7 +24,7 @@ class OCIGenAILLM(LLM):
     config: Optional[Any] = None
     endpoint: Optional[str] = None
     compartment_id: Optional[str] = None
-    
+
     # moved here by LS
     generative_ai_client: GenerativeAiClient = None
 
@@ -91,7 +91,7 @@ class OCIGenAILLM(LLM):
             print("The input prompt is:")
             print(prompt)
             print()
-            
+
         generate_text_response = self.generative_ai_client.generate_text(
             generate_text_detail
         )
