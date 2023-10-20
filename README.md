@@ -10,3 +10,7 @@ It means that:
 
 I'll try to keep the code updated.
 
+## Documentation
+The development of the proposed integration is based on the example, from LangChain, provided [here](https://python.langchain.com/docs/modules/model_io/models/llms/custom_llm)
+
+
