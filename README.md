@@ -1,5 +1,5 @@
 # Integrate OCI GenAI with LangChain
-This repo contains all the work done to develop demos on the integration between **LangChain** and Oracle **OCI GenAI** Service
+This repo contains all the work done to develop demos on the integration between [**LangChain**](https://www.langchain.com/) and Oracle [**OCI GenAI**](https://www.oracle.com/artificial-intelligence/generative-ai/large-language-models/) Service.
 
 ## OCI GenAI Service is in Limited Availability
 Consider that OCI GenAI Service (based on Cohere models) is now (oct. 2023) in **Limited Availability**.
