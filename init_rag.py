@@ -22,18 +22,29 @@ import oci
 # oci_llm is in a local file
 from oci_llm import OCIGenAILLM
 
+# config for the RAG
+from config_rag import BOOK, CHUNK_SIZE, CHUNK_OVERLAP, MAX_TOKENS, ENDPOINT
+
 # private configs
 from config_private import COMPARTMENT_OCID, COHERE_API_KEY
 
 DEBUG = False
 
-# OCI GenAI endpoint (for now Chicago)
-ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 CONFIG_PROFILE = "DEFAULT"
 
-BOOK = "./oracle-database-23c-new-features-guide.pdf"
 
-rag_chain = None
+#
+# def load_oci_config()
+#
+def load_oci_config():
+    # read OCI config to connect to OCI with API key
+    oci_config = oci.config.from_file("~/.oci/config", CONFIG_PROFILE)
+
+    # check the config to access to api keys
+    if DEBUG:
+        print(oci_config)
+
+    return oci_config
 
 
 #
@@ -43,12 +54,9 @@ rag_chain = None
 @st.cache_resource
 def initialize_rag_chain():
     # Initialize RAG
-    # read OCI config to connect to OCI with API key
-    config = oci.config.from_file("~/.oci/config", CONFIG_PROFILE)
 
-    # check the config to access to api keys
-    if DEBUG:
-        print(config)
+    # for oci llm
+    oci_config = load_oci_config()
 
     # Loading the pdf document
     loader = PyPDFLoader(BOOK)
@@ -59,8 +67,6 @@ def initialize_rag_chain():
 
     # split in chunks
     # try with smaller chuncks
-    CHUNK_SIZE = 800
-    CHUNK_OVERLAP = 50
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
@@ -88,13 +94,14 @@ def initialize_rag_chain():
 
     # Build the class for OCI GenAI
     llm = OCIGenAILLM(
-        max_tokens=1500,
-        config=config,
+        max_tokens=MAX_TOKENS,
+        config=oci_config,
         compartment_id=COMPARTMENT_OCID,
         endpoint=ENDPOINT,
-        debug=False,
+        debug=DEBUG,
     )
 
+    # for now hard coded...
     rag_prompt = hub.pull("rlm/rag-prompt")
 
     print("Building rag_chain...")
@@ -106,7 +113,7 @@ def initialize_rag_chain():
 
 
 #
-# def: get_answer
+# def: get_answer  from LLM
 #
 def get_answer(rag_chain, question):
     response = rag_chain.invoke(question)
