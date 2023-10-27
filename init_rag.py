@@ -14,6 +14,8 @@ from langchain.schema.runnable import RunnablePassthrough
 
 # removed OpenAI, using Cohere embeddings
 from langchain.embeddings import CohereEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
+
 
 from langchain import hub
 
@@ -23,7 +25,16 @@ import oci
 from oci_llm import OCIGenAILLM
 
 # config for the RAG
-from config_rag import BOOK, CHUNK_SIZE, CHUNK_OVERLAP, MAX_TOKENS, ENDPOINT
+from config_rag import (
+    BOOK,
+    CHUNK_SIZE,
+    CHUNK_OVERLAP,
+    MAX_TOKENS,
+    ENDPOINT,
+    EMBED_TYPE,
+    MAX_DOCS_RETRIEVED,
+    EMBED_HF_MODEL_NAME,
+)
 
 # private configs
 from config_private import COMPARTMENT_OCID, COHERE_API_KEY
@@ -84,13 +95,27 @@ def initialize_rag_chain():
         split.page_content = " ".join(split.page_content.split())
 
     print("Initializing vector store...")
-    cohere = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)
+
+    if EMBED_TYPE == "COHERE":
+        print("Loading Cohere Embeddings Model...")
+        embed_model = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)
+    if EMBED_TYPE == "LOCAL":
+        print(f"Loading HF Embeddings Model: {EMBED_HF_MODEL_NAME}")
+
+        model_kwargs = {"device": "cpu"}
+        encode_kwargs = {"normalize_embeddings": False}
+
+        embed_model = HuggingFaceEmbeddings(
+            model_name=EMBED_HF_MODEL_NAME,
+            model_kwargs=model_kwargs,
+            encode_kwargs=encode_kwargs,
+        )
 
     # using Chroma as Vector store
-    vectorstore = Chroma.from_documents(documents=splits, embedding=cohere)
+    vectorstore = Chroma.from_documents(documents=splits, embedding=embed_model)
 
     # increased num. of docs to 5 (default to 4)
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})
 
     # Build the class for OCI GenAI
     llm = OCIGenAILLM(
@@ -109,6 +134,7 @@ def initialize_rag_chain():
         {"context": retriever, "question": RunnablePassthrough()} | rag_prompt | llm
     )
 
+    print("Init RAG complete...")
     return rag_chain
 
 

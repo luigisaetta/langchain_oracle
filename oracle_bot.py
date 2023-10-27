@@ -1,5 +1,6 @@
 #
 # Streamlit App to demo OCI AI GenAI
+# this is the main code, with the UI
 #
 import streamlit as st
 
@@ -9,8 +10,6 @@ from init_rag import initialize_rag_chain, get_answer
 #
 # Configs
 #
-# to enable some debugging
-DEBUG = False
 
 
 #
@@ -33,15 +32,14 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # React to user input
-if question := st.chat_input("What is up?"):
+if question := st.chat_input("Hello, how can I help you?"):
     # Display user message in chat message container
     st.chat_message("user").markdown(question)
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": question})
 
-    print("...")
-
     # here we call OCI genai...
+    print("...")
     response = get_answer(rag_chain, question)
 
     # Display assistant response in chat message container
