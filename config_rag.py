@@ -9,11 +9,12 @@ MAX_DOCS_RETRIEVED = 5
 
 # book to use for augmentation
 BOOK = "./oracle-database-23c-new-features-guide.pdf"
+# BOOK = "./feynman_vol1.pdf"
 
 # endpoint for OCI GenAI
 ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 
-# max token returned form LLM for single query
+# max token returned from LLM for single query
 MAX_TOKENS = 1500
 
 # type of Embedding Model. The choice has been parametrized

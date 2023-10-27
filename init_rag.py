@@ -59,6 +59,19 @@ def load_oci_config():
 
 
 #
+# do some post processing on text
+#
+def post_process(splits):
+    for split in splits:
+        split.page_content = split.page_content.replace("\n", " ")
+        split.page_content = re.sub("[^a-zA-Z0-9 \n\.]", " ", split.page_content)
+        # remove duplicate blank
+        split.page_content = " ".join(split.page_content.split())
+
+    return splits
+
+
+#
 # def: Initialize_rag_chain
 #
 # to run it only once
@@ -66,10 +79,8 @@ def load_oci_config():
 def initialize_rag_chain():
     # Initialize RAG
 
-    # for oci llm
-    oci_config = load_oci_config()
-
     # Loading the pdf document
+    print(f"Loading book: {BOOK}")
     loader = PyPDFLoader(BOOK)
 
     docs = loader.load()
@@ -88,11 +99,7 @@ def initialize_rag_chain():
     print(f"We have splitted the pdf in {len(splits)} splits...")
 
     # some post processing
-    for split in splits:
-        split.page_content = split.page_content.replace("\n", " ")
-        split.page_content = re.sub("[^a-zA-Z0-9 \n\.]", " ", split.page_content)
-        # remove duplicate blank
-        split.page_content = " ".join(split.page_content.split())
+    splits = post_process(splits)
 
     print("Initializing vector store...")
 
@@ -112,12 +119,17 @@ def initialize_rag_chain():
         )
 
     # using Chroma as Vector store
+    print("Indexing...")
     vectorstore = Chroma.from_documents(documents=splits, embedding=embed_model)
 
     # increased num. of docs to 5 (default to 4)
     retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})
 
     # Build the class for OCI GenAI
+
+    # Only needed for OCI LLM
+    oci_config = load_oci_config()
+
     llm = OCIGenAILLM(
         max_tokens=MAX_TOKENS,
         config=oci_config,
