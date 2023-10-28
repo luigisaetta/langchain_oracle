@@ -26,7 +26,7 @@ from oci_llm import OCIGenAILLM
 
 # config for the RAG
 from config_rag import (
-    BOOK,
+    BOOK_LIST,
     CHUNK_SIZE,
     CHUNK_OVERLAP,
     MAX_TOKENS,
@@ -81,16 +81,23 @@ def initialize_rag_chain():
     # Initialize RAG
 
     # Loading the pdf document
-    print(f"Loading book: {BOOK}")
-    loader = PyPDFLoader(BOOK)
+    docs = []
 
-    docs = loader.load()
+    # modified to load a list of pdf
+    for book in BOOK_LIST:
+        print(f"Loading book: {book}...")
+        loader = PyPDFLoader(book)
 
-    print("PDF document loaded!")
+        # loader split in pages
+        pages = loader.load()
+        print(f"Loaded {len(pages)} pages...")
 
-    # split in chunks
+        docs.extend(pages)
+
+        print("PDF document loaded!")
+
+    # This split in chunks
     # try with smaller chuncks
-
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
@@ -111,7 +118,8 @@ def initialize_rag_chain():
         print(f"Loading HF Embeddings Model: {EMBED_HF_MODEL_NAME}")
 
         model_kwargs = {"device": "cpu"}
-        encode_kwargs = {"normalize_embeddings": False}
+        # changed to True for BAAI, to use cosine similarity
+        encode_kwargs = {"normalize_embeddings": True}
 
         embed_model = HuggingFaceEmbeddings(
             model_name=EMBED_HF_MODEL_NAME,

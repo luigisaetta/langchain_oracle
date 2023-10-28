@@ -8,8 +8,10 @@ CHUNK_OVERLAP = 50
 MAX_DOCS_RETRIEVED = 5
 
 # book to use for augmentation
-BOOK = "./oracle-database-23c-new-features-guide.pdf"
-# BOOK = "./feynman_vol1.pdf"
+BOOK1 = "./oracle-database-23c-new-features-guide.pdf"
+BOOK2 = "./database-concepts.pdf"
+
+BOOK_LIST = [BOOK1, BOOK2]
 
 # endpoint for OCI GenAI
 ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
@@ -23,8 +25,11 @@ TEMPERATURE = 0
 # Local means HF BAAI/bge-base-en-v1.5
 EMBED_TYPE = "LOCAL"
 # see: https://huggingface.co/spaces/mteb/leaderboard
-# EMBED_HF_MODEL_NAME = "BAAI/bge-base-en-v1.5"
-EMBED_HF_MODEL_NAME = "BAAI/bge-large-en-v1.5"
+# see also: https://github.com/FlagOpen/FlagEmbedding
+# base seems to work better than small
+EMBED_HF_MODEL_NAME = "BAAI/bge-base-en-v1.5"
+# EMBED_HF_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+# EMBED_HF_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 
 # Cohere means the embed model from Cohere site API
 # EMBED_TYPE = "COHERE"
