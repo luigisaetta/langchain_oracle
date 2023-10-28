@@ -80,8 +80,8 @@ def post_process(splits):
 def initialize_rag_chain():
     # Initialize RAG
 
-    # Loading the pdf document
-    docs = []
+    # Loading a list of pdf documents
+    all_pages = []
 
     # modified to load a list of pdf
     for book in BOOK_LIST:
@@ -92,7 +92,7 @@ def initialize_rag_chain():
         pages = loader.load()
         print(f"Loaded {len(pages)} pages...")
 
-        docs.extend(pages)
+        all_pages.extend(pages)
 
         print("PDF document loaded!")
 
@@ -102,7 +102,7 @@ def initialize_rag_chain():
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
 
-    splits = text_splitter.split_documents(docs)
+    splits = text_splitter.split_documents(all_pages)
 
     print(f"We have splitted the pdf in {len(splits)} splits...")
 
