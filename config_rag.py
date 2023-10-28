@@ -17,6 +17,8 @@ ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 # max token returned from LLM for single query
 MAX_TOKENS = 1500
 
+TEMPERATURE = 0
+
 # type of Embedding Model. The choice has been parametrized
 # Local means HF BAAI/bge-base-en-v1.5
 EMBED_TYPE = "LOCAL"

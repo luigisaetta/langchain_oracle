@@ -33,6 +33,7 @@ from config_rag import (
     ENDPOINT,
     EMBED_TYPE,
     MAX_DOCS_RETRIEVED,
+    TEMPERATURE,
     EMBED_HF_MODEL_NAME,
 )
 
@@ -131,6 +132,7 @@ def initialize_rag_chain():
     oci_config = load_oci_config()
 
     llm = OCIGenAILLM(
+        temperature=TEMPERATURE,
         max_tokens=MAX_TOKENS,
         config=oci_config,
         compartment_id=COMPARTMENT_OCID,
