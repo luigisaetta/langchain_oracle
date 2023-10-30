@@ -22,6 +22,8 @@ from langchain import hub
 
 import oci
 
+from langchain.llms import Cohere
+
 # oci_llm is in a local file
 from oci_llm import OCIGenAILLM
 
@@ -38,6 +40,7 @@ from config_rag import (
     TEMPERATURE,
     EMBED_HF_MODEL_NAME,
     TIMEOUT,
+    LLM_TYPE,
 )
 
 # private configs
@@ -144,17 +147,26 @@ def initialize_rag_chain():
     # Build the class for OCI GenAI
 
     # Only needed for OCI LLM
-    oci_config = load_oci_config()
+    print(f"Using {LLM_TYPE} llm...")
 
-    llm = OCIGenAILLM(
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS,
-        config=oci_config,
-        compartment_id=COMPARTMENT_OCID,
-        endpoint=ENDPOINT,
-        debug=DEBUG,
-        timeout=TIMEOUT,
-    )
+    if LLM_TYPE == "OCI":
+        oci_config = load_oci_config()
+
+        llm = OCIGenAILLM(
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
+            config=oci_config,
+            compartment_id=COMPARTMENT_OCID,
+            endpoint=ENDPOINT,
+            debug=DEBUG,
+            timeout=TIMEOUT,
+        )
+    if LLM_TYPE == "COHERE":
+        llm = Cohere(
+            cohere_api_key=COHERE_API_KEY,
+            max_tokens=MAX_TOKENS,
+            temperature=TEMPERATURE,
+        )
 
     # for now hard coded...
     rag_prompt = hub.pull("rlm/rag-prompt")

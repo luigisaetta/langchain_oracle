@@ -22,16 +22,23 @@ BOOK_LIST = [BOOK1, BOOK2]
 VECTOR_STORE_NAME = "CHROME"
 
 #
-# OCI GenAI configs
+# LLM Config
 #
-
-# endpoint for OCI GenAI
-ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
+# LLM_TYPE = "COHERE"
+LLM_TYPE = "OCI"
 
 # max token returned from LLM for single query
 MAX_TOKENS = 1500
 
 TEMPERATURE = 0
+
+
+#
+# OCI GenAI configs
+#
+
+# endpoint for OCI GenAI
+ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 
 # type of Embedding Model. The choice has been parametrized
 # Local means HF BAAI/bge-base-en-v1.5
