@@ -9,6 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # two possible vector store
 from langchain.vectorstores import Chroma
+from langchain.vectorstores import FAISS
 
 from langchain.schema.runnable import RunnablePassthrough
 
@@ -36,6 +37,7 @@ from config_rag import (
     MAX_DOCS_RETRIEVED,
     TEMPERATURE,
     EMBED_HF_MODEL_NAME,
+    TIMEOUT,
 )
 
 # private configs
@@ -133,6 +135,8 @@ def initialize_rag_chain():
 
     if VECTOR_STORE_NAME == "CHROME":
         vectorstore = Chroma.from_documents(documents=splits, embedding=embed_model)
+    if VECTOR_STORE_NAME == "FAISS":
+        vectorstore = FAISS.from_documents(documents=splits, embedding=embed_model)
 
     # increased num. of docs to 5 (default to 4)
     retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})
@@ -149,6 +153,7 @@ def initialize_rag_chain():
         compartment_id=COMPARTMENT_OCID,
         endpoint=ENDPOINT,
         debug=DEBUG,
+        timeout=TIMEOUT,
     )
 
     # for now hard coded...

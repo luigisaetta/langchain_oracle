@@ -2,6 +2,7 @@
 # see https://python.langchain.com/docs/modules/model_io/models/llms/custom_llm
 #
 from typing import Any, List, Mapping, Optional
+from time import time
 
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.llms.base import LLM
@@ -25,6 +26,7 @@ class OCIGenAILLM(LLM):
     config: Optional[Any] = None
     endpoint: Optional[str] = None
     compartment_id: Optional[str] = None
+    timeout: Optional[int] = 10
 
     # moved here by LS
     generative_ai_client: GenerativeAiClient = None
@@ -60,7 +62,7 @@ class OCIGenAILLM(LLM):
             config=self.config,
             service_endpoint=self.endpoint,
             retry_strategy=NoneRetryStrategy(),
-            timeout=(10, 240),
+            timeout=(self.timeout, 240),
         )
 
     @property
@@ -78,6 +80,8 @@ class OCIGenAILLM(LLM):
             raise ValueError("stop kwargs are not permitted.")
 
         # calling OCI GenAI
+        tStart = time()
+
         generate_text_detail = GenerateTextDetails()
         generate_text_detail.prompts = [prompt]
         generate_text_detail.serving_mode = OnDemandServingMode(model_id=self.model_id)
@@ -98,6 +102,12 @@ class OCIGenAILLM(LLM):
         generate_text_response = self.generative_ai_client.generate_text(
             generate_text_detail
         )
+
+        tEla = time() - tStart
+
+        if self.debug:
+            print(f"Elapsed time: {round(tEla, 1)} sec...")
+            print()
 
         return generate_text_response.data.generated_texts[0][0].text
 

@@ -1,5 +1,7 @@
 # configurations for the RAG
 
+TIMEOUT = 30
+
 # to divide docs in chunks
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 50
