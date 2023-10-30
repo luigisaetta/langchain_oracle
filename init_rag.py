@@ -29,6 +29,7 @@ from config_rag import (
     BOOK_LIST,
     CHUNK_SIZE,
     CHUNK_OVERLAP,
+    VECTOR_STORE_NAME,
     MAX_TOKENS,
     ENDPOINT,
     EMBED_TYPE,
@@ -129,7 +130,9 @@ def initialize_rag_chain():
 
     # using Chroma as Vector store
     print("Indexing...")
-    vectorstore = Chroma.from_documents(documents=splits, embedding=embed_model)
+
+    if VECTOR_STORE_NAME == "CHROME":
+        vectorstore = Chroma.from_documents(documents=splits, embedding=embed_model)
 
     # increased num. of docs to 5 (default to 4)
     retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})

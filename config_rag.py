@@ -13,6 +13,16 @@ BOOK2 = "./database-concepts.pdf"
 
 BOOK_LIST = [BOOK1, BOOK2]
 
+#
+# Vector Store (Chrome or FAISS)
+#
+# VECTOR_STORE_NAME = "FAISS"
+VECTOR_STORE_NAME = "CHROME"
+
+#
+# OCI GenAI configs
+#
+
 # endpoint for OCI GenAI
 ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 
