@@ -23,7 +23,7 @@ if "messages" not in st.session_state:
 
 # init RAG
 rag_chain = initialize_rag_chain()
-print("OCI GenAI and RAG chain Ready!")
+print("RAG chain Ready!!!")
 print()
 
 # Display chat messages from history on app rerun

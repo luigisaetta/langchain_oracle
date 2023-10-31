@@ -90,7 +90,7 @@ def post_process(splits):
 def initialize_rag_chain():
     # Initialize RAG
 
-    # Loading a list of pdf documents
+    # 1. Loading a list of pdf documents
     all_pages = []
 
     # modified to load a list of pdf
@@ -106,8 +106,7 @@ def initialize_rag_chain():
 
         print("PDF document loaded!")
 
-    # This split in chunks
-    # try with smaller chuncks
+    # 2. Split pages in chunks
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
@@ -119,6 +118,7 @@ def initialize_rag_chain():
     # some post processing
     splits = post_process(splits)
 
+    # 3. LOad embeddings model
     print("Initializing vector store...")
 
     if EMBED_TYPE == "COHERE":
@@ -137,7 +137,7 @@ def initialize_rag_chain():
             encode_kwargs=encode_kwargs,
         )
 
-    # using Chroma as Vector store
+    # 4. Create a Vectore Store and store embeddings
     print(f"Indexing: using {VECTOR_STORE_NAME} as Vector Store...")
 
     if VECTOR_STORE_NAME == "CHROME":
@@ -145,14 +145,14 @@ def initialize_rag_chain():
     if VECTOR_STORE_NAME == "FAISS":
         vectorstore = FAISS.from_documents(documents=splits, embedding=embed_model)
 
+    # 5. Create a retriever
     # increased num. of docs to 5 (default to 4)
     retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})
-
-    # Build the class for OCI GenAI
 
     # Only needed for OCI LLM
     print(f"Using {LLM_TYPE} llm...")
 
+    # 6. Build the LLM
     if LLM_TYPE == "OCI":
         oci_config = load_oci_config()
 
@@ -167,6 +167,7 @@ def initialize_rag_chain():
         )
     if LLM_TYPE == "COHERE":
         llm = Cohere(
+            model="command",  # suing large model and not nightly
             cohere_api_key=COHERE_API_KEY,
             max_tokens=MAX_TOKENS,
             temperature=TEMPERATURE,
@@ -175,6 +176,7 @@ def initialize_rag_chain():
     # for now hard coded...
     rag_prompt = hub.pull("rlm/rag-prompt")
 
+    # 6. build the entire RAG chain
     print("Building rag_chain...")
     rag_chain = (
         {"context": retriever, "question": RunnablePassthrough()} | rag_prompt | llm
@@ -190,9 +192,10 @@ def initialize_rag_chain():
 def get_answer(rag_chain, question):
     response = rag_chain.invoke(question)
 
-    print(f"Question: {question}")
-    print("The response:")
-    print(response)
-    print()
+    if DEBUG:
+        print(f"Question: {question}")
+        print("The response:")
+        print(response)
+        print()
 
     return response
