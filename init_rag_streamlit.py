@@ -1,6 +1,8 @@
 #
-# This one is to be used in Notebooks
+# This one is to be used with Streamlit
 #
+
+import streamlit as st
 
 # for pdf post processing
 import re
@@ -83,6 +85,8 @@ def post_process(splits):
 #
 # def: Initialize_rag_chain
 #
+# to run it only once
+@st.cache_resource
 def initialize_rag_chain():
     # Initialize RAG
 

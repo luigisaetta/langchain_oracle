@@ -41,7 +41,7 @@ TEMPERATURE = 0
 ENDPOINT = "https://generativeai.aiservice.us-chicago-1.oci.oraclecloud.com"
 
 # type of Embedding Model. The choice has been parametrized
-# Local means HF BAAI/bge-base-en-v1.5
+# Local means HF
 EMBED_TYPE = "LOCAL"
 # see: https://huggingface.co/spaces/mteb/leaderboard
 # see also: https://github.com/FlagOpen/FlagEmbedding

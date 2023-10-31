@@ -5,7 +5,7 @@
 import streamlit as st
 
 # this function initialise the rag chain, creating retriever, llm and chain
-from init_rag import initialize_rag_chain, get_answer
+from init_rag_streamlit import initialize_rag_chain, get_answer
 
 #
 # Configs
