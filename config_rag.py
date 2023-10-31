@@ -44,7 +44,7 @@ MAX_DOCS_RETRIEVED = 5
 # LLM_TYPE = "COHERE"
 LLM_TYPE = "OCI"
 
-# max token returned from LLM for single query
+# max tokens returned from LLM for single query
 MAX_TOKENS = 1500
 TEMPERATURE = 0
 

@@ -167,7 +167,7 @@ def initialize_rag_chain():
         )
     if LLM_TYPE == "COHERE":
         llm = Cohere(
-            model="command",  # suing large model and not nightly
+            model="command",  # using large model and not nightly
             cohere_api_key=COHERE_API_KEY,
             max_tokens=MAX_TOKENS,
             temperature=TEMPERATURE,
