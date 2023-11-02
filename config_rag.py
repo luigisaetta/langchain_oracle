@@ -32,7 +32,7 @@ EMBED_HF_MODEL_NAME = "BAAI/bge-base-en-v1.5"
 
 # Cohere means the embed model from Cohere site API
 # EMBED_TYPE = "COHERE"
-
+EMBED_COHERE_MODEL_NAME = "embed-english-v3.0"
 
 # number of docs to return from Retriever
 MAX_DOCS_RETRIEVED = 5

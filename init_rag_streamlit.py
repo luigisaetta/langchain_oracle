@@ -11,6 +11,9 @@ import re
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+# for caching
+from langchain.storage import LocalFileStore
+
 # two possible vector store
 from langchain.vectorstores import Chroma
 from langchain.vectorstores import FAISS
@@ -20,6 +23,7 @@ from langchain.schema.runnable import RunnablePassthrough
 # removed OpenAI, using Cohere embeddings
 from langchain.embeddings import CohereEmbeddings
 from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.embeddings import CacheBackedEmbeddings
 
 
 from langchain import hub
@@ -40,6 +44,7 @@ from config_rag import (
     MAX_TOKENS,
     ENDPOINT,
     EMBED_TYPE,
+    EMBED_COHERE_MODEL_NAME,
     MAX_DOCS_RETRIEVED,
     TEMPERATURE,
     EMBED_HF_MODEL_NAME,
@@ -121,9 +126,14 @@ def initialize_rag_chain():
     # 3. LOad embeddings model
     print("Initializing vector store...")
 
+    # Inroduced to cache embeddings and make it faster
+    fs = LocalFileStore("./vector-cache/")
+
     if EMBED_TYPE == "COHERE":
         print("Loading Cohere Embeddings Model...")
-        embed_model = CohereEmbeddings(cohere_api_key=COHERE_API_KEY)
+        embed_model = CohereEmbeddings(
+            model=EMBED_COHERE_MODEL_NAME, cohere_api_key=COHERE_API_KEY
+        )
     if EMBED_TYPE == "LOCAL":
         print(f"Loading HF Embeddings Model: {EMBED_HF_MODEL_NAME}")
 
@@ -137,13 +147,19 @@ def initialize_rag_chain():
             encode_kwargs=encode_kwargs,
         )
 
+    # the cache for embeddings
+    cached_embedder = CacheBackedEmbeddings.from_bytes_store(
+        embed_model, fs, namespace=embed_model.model_name
+    )
+
     # 4. Create a Vectore Store and store embeddings
     print(f"Indexing: using {VECTOR_STORE_NAME} as Vector Store...")
 
     if VECTOR_STORE_NAME == "CHROME":
-        vectorstore = Chroma.from_documents(documents=splits, embedding=embed_model)
+        # modified to cache
+        vectorstore = Chroma.from_documents(documents=splits, embedding=cached_embedder)
     if VECTOR_STORE_NAME == "FAISS":
-        vectorstore = FAISS.from_documents(documents=splits, embedding=embed_model)
+        vectorstore = FAISS.from_documents(documents=splits, embedding=cached_embedder)
 
     # 5. Create a retriever
     # increased num. of docs to 5 (default to 4)
