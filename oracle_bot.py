@@ -23,8 +23,6 @@ if "messages" not in st.session_state:
 
 # init RAG
 rag_chain = initialize_rag_chain()
-print("RAG chain Ready!!!")
-print()
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:

@@ -109,11 +109,10 @@ def initialize_rag_chain():
 
         # loader split in pages
         pages = loader.load()
-        print(f"Loaded {len(pages)} pages...")
 
         all_pages.extend(pages)
 
-        print("PDF document loaded!")
+        print(f"Loaded {len(pages)} pages...")
 
     # 2. Split pages in chunks
     text_splitter = RecursiveCharacterTextSplitter(
@@ -167,6 +166,7 @@ def initialize_rag_chain():
 
     # 5. Create a retriever
     # increased num. of docs to 5 (default to 4)
+    # added optionally a reranker
     if ADD_RERANKER == False:
         # no reranking
         print("No reranking...")
