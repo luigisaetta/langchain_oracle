@@ -25,6 +25,9 @@ from langchain.embeddings import CohereEmbeddings
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.embeddings import CacheBackedEmbeddings
 
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import CohereRerank
+
 
 from langchain import hub
 
@@ -46,6 +49,7 @@ from config_rag import (
     EMBED_TYPE,
     EMBED_COHERE_MODEL_NAME,
     MAX_DOCS_RETRIEVED,
+    ADD_RERANKER,
     TEMPERATURE,
     EMBED_HF_MODEL_NAME,
     TIMEOUT,
@@ -126,7 +130,7 @@ def initialize_rag_chain():
     # 3. LOad embeddings model
     print("Initializing vector store...")
 
-    # Inroduced to cache embeddings and make it faster
+    # Introduced to cache embeddings and make it faster
     fs = LocalFileStore("./vector-cache/")
 
     if EMBED_TYPE == "COHERE":
@@ -163,12 +167,27 @@ def initialize_rag_chain():
 
     # 5. Create a retriever
     # increased num. of docs to 5 (default to 4)
-    retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})
+    if ADD_RERANKER == False:
+        # no reranking
+        print("No reranking...")
+        retriever = vectorstore.as_retriever(search_kwargs={"k": MAX_DOCS_RETRIEVED})
+    else:
+        # to add reranking
+        print("Adding reranking to QA chain...")
 
-    # Only needed for OCI LLM
-    print(f"Using {LLM_TYPE} llm...")
+        compressor = CohereRerank(cohere_api_key=COHERE_API_KEY)
+
+        base_retriever = vectorstore.as_retriever(
+            search_kwargs={"k": MAX_DOCS_RETRIEVED}
+        )
+
+        retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, base_retriever=base_retriever
+        )
 
     # 6. Build the LLM
+    print(f"Using {LLM_TYPE} llm...")
+
     if LLM_TYPE == "OCI":
         oci_config = load_oci_config()
 

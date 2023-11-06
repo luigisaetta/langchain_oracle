@@ -37,6 +37,8 @@ EMBED_COHERE_MODEL_NAME = "embed-english-v3.0"
 # number of docs to return from Retriever
 MAX_DOCS_RETRIEVED = 5
 
+# to add Cohere reranker to the QA chain
+ADD_RERANKER = True
 
 #
 # LLM Config
@@ -46,6 +48,7 @@ LLM_TYPE = "OCI"
 
 # max tokens returned from LLM for single query
 MAX_TOKENS = 1500
+# to avoid "creativity"
 TEMPERATURE = 0
 
 #
