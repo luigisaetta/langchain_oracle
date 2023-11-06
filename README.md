@@ -24,6 +24,7 @@ The development of the proposed integration is based on the example, from LangCh
 * How-to use Cohere Embeddings
 * How-to use HF Embeddings
 * How-to setup a Retriever using Embeddings
+* How-to add Cohere reranker to the chain
 * How to integrate OCI GenAI Service with LangChain
 * How to define the LangChain
 
@@ -35,6 +36,10 @@ You need to put in the local directory:
 * database-concepts.pdf
 
 You can add more pdf. Edit [config_rag.py](./config_rag.py)
+
+## Video
+A Video showing Oracle Bot powered by GenAI is available in this linkedin [post](https://www.linkedin.com/feed/update/urn:li:activity:7127218835404795905/)
+
 
 
 
