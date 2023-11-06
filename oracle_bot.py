@@ -12,10 +12,16 @@ from init_rag_streamlit import initialize_rag_chain, get_answer
 #
 
 
+def reset_conversation():
+    st.session_state.messages = []
+
+
 #
 # Main
 #
 st.title("OCI Generative AI Bot powered by RAG")
+
+st.button("Reset Chat", on_click=reset_conversation)
 
 # Initialize chat history
 if "messages" not in st.session_state:
