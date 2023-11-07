@@ -21,11 +21,12 @@ def reset_conversation():
 #
 st.title("OCI Generative AI Bot powered by RAG")
 
-st.button("Reset Chat", on_click=reset_conversation)
+# Added reset button
+st.button("Clear Chat History", on_click=reset_conversation)
 
 # Initialize chat history
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    reset_conversation()
 
 # init RAG
 rag_chain = initialize_rag_chain()
@@ -43,12 +44,17 @@ if question := st.chat_input("Hello, how can I help you?"):
     st.session_state.messages.append({"role": "user", "content": question})
 
     # here we call OCI genai...
-    print("...")
-    response = get_answer(rag_chain, question)
 
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        st.markdown(response)
+    try:
+        print("...")
+        response = get_answer(rag_chain, question)
 
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            st.markdown(response)
+
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
+
+    except Exception as e:
+        st.error("An error occurred: " + str(e))

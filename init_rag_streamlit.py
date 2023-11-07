@@ -28,12 +28,11 @@ from langchain.embeddings import CacheBackedEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank
 
-
 from langchain import hub
 
-import oci
-
 from langchain.llms import Cohere
+
+import oci
 
 # oci_llm is in a local file
 from oci_llm import OCIGenAILLM
@@ -65,7 +64,7 @@ CONFIG_PROFILE = "DEFAULT"
 
 
 #
-# def load_oci_config()
+# load_oci_config(): load the OCI security config
 #
 def load_oci_config():
     # read OCI config to connect to OCI with API key
@@ -83,6 +82,7 @@ def load_oci_config():
 #
 def post_process(splits):
     for split in splits:
+        # replace newline with blank
         split.page_content = split.page_content.replace("\n", " ")
         split.page_content = re.sub("[^a-zA-Z0-9 \n\.]", " ", split.page_content)
         # remove duplicate blank
@@ -99,10 +99,9 @@ def post_process(splits):
 def initialize_rag_chain():
     # Initialize RAG
 
-    # 1. Loading a list of pdf documents
+    # 1. Load a list of pdf documents
     all_pages = []
 
-    # modified to load a list of pdf
     for book in BOOK_LIST:
         print(f"Loading book: {book}...")
         loader = PyPDFLoader(book)
@@ -121,12 +120,12 @@ def initialize_rag_chain():
 
     splits = text_splitter.split_documents(all_pages)
 
-    print(f"We have splitted the pdf in {len(splits)} splits...")
-
-    # some post processing
+    # some post processing on text
     splits = post_process(splits)
 
-    # 3. LOad embeddings model
+    print(f"Splitted the pdf in {len(splits)} splits...")
+
+    # 3. Load embeddings model
     print("Initializing vector store...")
 
     # Introduced to cache embeddings and make it faster
@@ -162,6 +161,7 @@ def initialize_rag_chain():
         # modified to cache
         vectorstore = Chroma.from_documents(documents=splits, embedding=cached_embedder)
     if VECTOR_STORE_NAME == "FAISS":
+        # modified to cache
         vectorstore = FAISS.from_documents(documents=splits, embedding=cached_embedder)
 
     # 5. Create a retriever
@@ -218,6 +218,7 @@ def initialize_rag_chain():
     )
 
     print("Init RAG complete...")
+
     return rag_chain
 
 
