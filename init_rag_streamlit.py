@@ -59,7 +59,6 @@ from config_rag import (
 from config_private import COMPARTMENT_OCID, COHERE_API_KEY
 
 DEBUG = False
-
 CONFIG_PROFILE = "DEFAULT"
 
 
@@ -92,17 +91,13 @@ def post_process(splits):
 
 
 #
-# def: Initialize_rag_chain
+# load all pages from pdf books
 #
-# to run it only once
-@st.cache_resource
-def initialize_rag_chain():
-    # Initialize RAG
-
-    # 1. Load a list of pdf documents
+#
+def load_all_pages(book_list):
     all_pages = []
 
-    for book in BOOK_LIST:
+    for book in book_list:
         print(f"Loading book: {book}...")
         loader = PyPDFLoader(book)
 
@@ -113,7 +108,13 @@ def initialize_rag_chain():
 
         print(f"Loaded {len(pages)} pages...")
 
-    # 2. Split pages in chunks
+    return all_pages
+
+
+#
+# Split pages in chunk
+#
+def split_in_chunks(all_pages):
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
     )
@@ -123,10 +124,16 @@ def initialize_rag_chain():
     # some post processing on text
     splits = post_process(splits)
 
-    print(f"Splitted the pdf in {len(splits)} splits...")
+    print(f"Splitted the pdf in {len(splits)} chunks...")
 
-    # 3. Load embeddings model
-    print("Initializing vector store...")
+    return splits
+
+
+#
+# Load the embedding model
+#
+def load_cached_embedder():
+    print("Initializing Embeddings model...")
 
     # Introduced to cache embeddings and make it faster
     fs = LocalFileStore("./vector-cache/")
@@ -136,7 +143,7 @@ def initialize_rag_chain():
         embed_model = CohereEmbeddings(
             model=EMBED_COHERE_MODEL_NAME, cohere_api_key=COHERE_API_KEY
         )
-    if EMBED_TYPE == "LOCAL":
+    elif EMBED_TYPE == "LOCAL":
         print(f"Loading HF Embeddings Model: {EMBED_HF_MODEL_NAME}")
 
         model_kwargs = {"device": "cpu"}
@@ -154,19 +161,13 @@ def initialize_rag_chain():
         embed_model, fs, namespace=embed_model.model_name
     )
 
-    # 4. Create a Vectore Store and store embeddings
-    print(f"Indexing: using {VECTOR_STORE_NAME} as Vector Store...")
+    return cached_embedder
 
-    if VECTOR_STORE_NAME == "CHROME":
-        # modified to cache
-        vectorstore = Chroma.from_documents(documents=splits, embedding=cached_embedder)
-    if VECTOR_STORE_NAME == "FAISS":
-        # modified to cache
-        vectorstore = FAISS.from_documents(documents=splits, embedding=cached_embedder)
 
-    # 5. Create a retriever
-    # increased num. of docs to 5 (default to 4)
-    # added optionally a reranker
+#
+# create retrievere with optional reranker
+#
+def create_retriever(vectorstore):
     if ADD_RERANKER == False:
         # no reranking
         print("No reranking...")
@@ -185,10 +186,36 @@ def initialize_rag_chain():
             base_compressor=compressor, base_retriever=base_retriever
         )
 
-    # 6. Build the LLM
-    print(f"Using {LLM_TYPE} llm...")
+    return retriever
 
-    if LLM_TYPE == "OCI":
+
+#
+# create vector store
+#
+def create_vector_store(store_type, document_splits, embedder):
+    print(f"Indexing: using {store_type} as Vector Store...")
+
+    if store_type == "CHROME":
+        # modified to cache
+        vectorstore = Chroma.from_documents(
+            documents=document_splits, embedding=embedder
+        )
+    elif store_type == "FAISS":
+        # modified to cache
+        vectorstore = FAISS.from_documents(
+            documents=document_splits, embedding=embedder
+        )
+
+    return vectorstore
+
+
+#
+# Build LLM
+#
+def build_llm(llm_type):
+    print(f"Using {llm_type} llm...")
+
+    if llm_type == "OCI":
         oci_config = load_oci_config()
 
         llm = OCIGenAILLM(
@@ -200,7 +227,7 @@ def initialize_rag_chain():
             debug=DEBUG,
             timeout=TIMEOUT,
         )
-    if LLM_TYPE == "COHERE":
+    elif llm_type == "COHERE":
         llm = Cohere(
             model="command",  # using large model and not nightly
             cohere_api_key=COHERE_API_KEY,
@@ -208,10 +235,41 @@ def initialize_rag_chain():
             temperature=TEMPERATURE,
         )
 
-    # for now hard coded...
+    return llm
+
+
+#
+# Initialize_rag_chain
+#
+# to run it only once
+@st.cache_resource
+def initialize_rag_chain():
+    # Initialize RAG
+
+    # 1. Load a list of pdf documents
+    all_pages = load_all_pages(BOOK_LIST)
+
+    # 2. Split pages in chunks
+    document_splits = split_in_chunks(all_pages)
+
+    # 3. Load embeddings model
+    embedder = load_cached_embedder()
+
+    # 4. Create a Vectore Store and store embeddings
+    vectorstore = create_vector_store(VECTOR_STORE_NAME, document_splits, embedder)
+
+    # 5. Create a retriever
+    # increased num. of docs to 5 (default to 4)
+    # added optionally a reranker
+    retriever = create_retriever(vectorstore)
+
+    # 6. Build the LLM
+    llm = build_llm(LLM_TYPE)
+
+    # 7. define the prompt (for now hard coded...)
     rag_prompt = hub.pull("rlm/rag-prompt")
 
-    # 6. build the entire RAG chain
+    # 8. build the entire RAG chain
     print("Building rag_chain...")
     rag_chain = (
         {"context": retriever, "question": RunnablePassthrough()} | rag_prompt | llm
