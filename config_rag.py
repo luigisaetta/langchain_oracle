@@ -1,5 +1,8 @@
 # configurations for the RAG
 
+# to enable debugging info..
+DEBUG = False
+
 # book to use for augmentation
 BOOK1 = "./oracle-database-23c-new-features-guide.pdf"
 BOOK2 = "./database-concepts.pdf"

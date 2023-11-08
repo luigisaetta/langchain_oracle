@@ -47,7 +47,7 @@ class OCIGenAILLM(LLM):
                 temperature=0, 
                 config=config, 
                 compartment_id=compartment_id, 
-                endpoint=endpoint
+                service_endpoint=endpoint
                 )
 
 
