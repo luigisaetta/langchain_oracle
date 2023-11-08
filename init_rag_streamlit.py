@@ -29,6 +29,7 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CohereRerank
 
 from langchain import hub
+from langchain.prompts import ChatPromptTemplate
 
 from langchain.llms import Cohere
 
@@ -53,12 +54,12 @@ from config_rag import (
     EMBED_HF_MODEL_NAME,
     TIMEOUT,
     LLM_TYPE,
+    DEBUG
 )
 
 # private configs
 from config_private import COMPARTMENT_OCID, COHERE_API_KEY
 
-DEBUG = False
 CONFIG_PROFILE = "DEFAULT"
 
 
@@ -71,7 +72,10 @@ def load_oci_config():
 
     # check the config to access to api keys
     if DEBUG:
+        print()
+        print("OCI Config:")
         print(oci_config)
+        print()
 
     return oci_config
 
@@ -132,7 +136,7 @@ def split_in_chunks(all_pages):
 #
 # Load the embedding model
 #
-def load_cached_embedder():
+def create_cached_embedder():
     print("Initializing Embeddings model...")
 
     # Introduced to cache embeddings and make it faster
@@ -223,7 +227,7 @@ def build_llm(llm_type):
             max_tokens=MAX_TOKENS,
             config=oci_config,
             compartment_id=COMPARTMENT_OCID,
-            endpoint=ENDPOINT,
+            service_endpoint=ENDPOINT,
             debug=DEBUG,
             timeout=TIMEOUT,
         )
@@ -253,7 +257,7 @@ def initialize_rag_chain():
     document_splits = split_in_chunks(all_pages)
 
     # 3. Load embeddings model
-    embedder = load_cached_embedder()
+    embedder = create_cached_embedder()
 
     # 4. Create a Vectore Store and store embeddings
     vectorstore = create_vector_store(VECTOR_STORE_NAME, document_splits, embedder)
@@ -267,7 +271,13 @@ def initialize_rag_chain():
     llm = build_llm(LLM_TYPE)
 
     # 7. define the prompt (for now hard coded...)
-    rag_prompt = hub.pull("rlm/rag-prompt")
+    # rag_prompt = hub.pull("rlm/rag-prompt")
+    template = """Answer the question based only on the following context:
+    {context}
+
+    Question: {question}
+    """
+    rag_prompt = ChatPromptTemplate.from_template(template)
 
     # 8. build the entire RAG chain
     print("Building rag_chain...")

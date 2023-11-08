@@ -24,7 +24,7 @@ class OCIGenAILLM(LLM):
     top_p: float = 0.75
     top_k: int = 0
     config: Optional[Any] = None
-    endpoint: Optional[str] = None
+    service_endpoint: Optional[str] = None
     compartment_id: Optional[str] = None
     timeout: Optional[int] = 10
 
@@ -60,7 +60,7 @@ class OCIGenAILLM(LLM):
         # here we create and store the GenAIClient
         self.generative_ai_client = GenerativeAiClient(
             config=self.config,
-            service_endpoint=self.endpoint,
+            service_endpoint=self.service_endpoint,
             retry_strategy=NoneRetryStrategy(),
             timeout=(self.timeout, 240),
         )
