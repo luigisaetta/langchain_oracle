@@ -7,7 +7,8 @@ Availability**.
 
 It means that:
 * to test this code you need to apply for the LA
-* During the LA there could be breaking changes, in the OCI SDK or in the signature of the service.
+* during the LA there could be breaking changes, in the OCI SDK or in the signature of the service.
+* integration with LangChain will be published officially. Plans are that it will be published when GenAI Service will be GA.
 
 I'll try to keep the code updated.
 
@@ -38,7 +39,7 @@ You need to put in the local directory:
 You can add more pdf. Edit [config_rag.py](./config_rag.py)
 
 ## Video
-A Video showing Oracle Bot powered by GenAI is available in this linkedin [post](https://www.linkedin.com/feed/update/urn:li:activity:7127218835404795905/)
+A Video showing Oracle Bot powered by GenAI is available in this LinkedIn [post](https://www.linkedin.com/feed/update/urn:li:activity:7127218835404795905/)
 
 
 
